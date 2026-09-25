@@ -1,5 +1,5 @@
 name: bunready
-description: Report what will break when a Node or TypeScript repository moves to Bun, and upload the result to code scanning.
+description: Report what will break when a Node or TypeScript repository moves to Bun, and upload the result to code scanning Supports monorepos, changed-only scanning since a git ref, baselines and SARIF.
 author: MHAlikhani
 branding:
   icon: check-circle
@@ -74,11 +74,13 @@ runs:
         printf 'verdict=%s\n' "${verdict}" >> "${GITHUB_OUTPUT}"
         printf 'bunready: %s (exit %s)\n' "${verdict}" "${status}" >> "${GITHUB_STEP_SUMMARY}"
 
+        set +e
         scan "${INPUT_PATH}" --sarif > "${INPUT_SARIF}"
+        set -e
 
     - name: Upload SARIF
       if: ${{ inputs.upload == 'true' }}
-      uses: github/codeql-action/upload-sarif@b96794f015dfd88f77b49b1c93e0fa7110f94c63 # v4
+      uses: github/codeql-action/upload-sarif@1c5b675653bb5c22dbe9b12b556ec555138e09fd # v4
       with:
         sarif_file: ${{ inputs.sarif-file }}
         category: bunready
